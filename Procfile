@@ -1,1 +1,1 @@
-web: gunicorn laptopspecs.wsgi --log-file -
+web: gunicorn --pythonpath laptopspecs laptopspecs.wsgi --log-file -
