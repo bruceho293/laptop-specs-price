@@ -1,1 +1,1 @@
-web: gunicorn "./backend/laptopspecs/laptopspecs/wsgi.py" --log-file -
+web: gunicorn backend.laptopspecs.laptopspecs.wsgi --log-file -
