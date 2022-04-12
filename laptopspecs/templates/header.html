@@ -1,0 +1,44 @@
+{% load static %}
+
+<div class="header">
+    <div id="label-icon">
+        <a href="{% url 'homepage' %}" class="label-icon-button">
+            <p>LTXP</p>
+        </a>
+    </div>
+    <div id="section">
+        <form class="form" action="{% url 'laptop:laptop-search' %}" method="GET">
+            <input 
+                name="q" 
+                type="text"
+                class="search-box" 
+                placeholder="Enter name to search..." 
+                label="q"
+                aria-label="Laptop Name Query"
+                required
+            />
+            <input 
+                type="submit"
+                value=""
+                style="
+                    background-image: url({% static 'images/search.svg' %}); 
+                    background-color:transparent;
+                    background-position: center center;
+                    background-repeat: no-repeat;
+                    background-size: 100%;
+                    border: none;
+                    height: 2em;
+                    width: 2em;
+                "
+                {% comment %} src="{% static 'images/search.svg' %}"  {% endcomment %}
+                alt="Search Button"
+                aria-label="Search Button"
+            />
+        </form>
+        <div class="setting-options">
+            <button class="theme" role="switch" aria-lable="light/dark toggle">
+            </button>
+        </div>
+    </div>
+</div>
+<hr>

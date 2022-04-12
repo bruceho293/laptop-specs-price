@@ -1,1 +1,1 @@
-web: gunicorn backend.laptopspecs.laptopspecs.wsgi --log-file -
+web: gunicorn laptopspecs.wsgi --log-file -

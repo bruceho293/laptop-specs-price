@@ -1,0 +1,154 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'laptop/css/detail.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'laptop/css/item-list.css' %}">
+<div class="wrapper">
+    <div id="laptop-header">    
+        <div class="laptop-section">
+            <h1>{{ laptop }}</h1>
+            {% comment %} <a href="#" class="button-link">
+                Current Search &#8617;
+            </a> {% endcomment %}
+        </div>
+        <div class="laptop-section">
+            <p><b>Updated:</b> {{ laptop.updated | naturaltime }}</p>
+            <p><b>Brand:</b> {{ laptop.brand }}</p>
+            <p><b>Price (in CAD):</b> ${{ laptop.get_price | intcomma }}</p>
+            <a href="{{ laptop.get_source_url }}" class="button-link">
+                Go to Source
+            </a>
+        </div>
+    </div>
+    <hr>
+    <div class="laptop-memo">
+        <h2>MEMO</h2>
+        <p><b>Processor: </b> {{ laptop.processor }}</p>
+        <p><b>Memory: </b> {{ laptop.memory }}</p>
+        <p><b>Graphics: </b> {{ laptop.graphics }}</p>
+        <p><b>Storage: </b> {{ laptop.storage }}</p> 
+    </div>
+    <hr>
+    <div class="laptop-specs-price">
+        <h2>Laptop Matching Specs and Price</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th scope="col">Component</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Overall Price (in CAD)</th>
+                    <th scope="col">Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Processor</th>
+                    {% if not closest_comp.processor %}
+                    
+                    <td>{{ no_match_notif }}</td>
+                    <td>0</td>
+                    <td>$0</td>
+                    <td>No updates</td>
+                   
+                    {% else %}
+                    
+                    <td>    
+                        <a href="{{ closest_comp.processor.get_source_url}}" class="row-link">
+                            <p>{{ closest_comp.processor }}</p>
+                        </a>
+                    </td>
+                    <td>{{ component_qnty.CPU }}</td>
+                    <td>${{ component_overall_price.CPU | intcomma }}</td>
+                    <td>{{ closest_comp.processor.updated | naturaltime }}</td>
+                    
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th scope="row">Memory</th>
+                    {% if not closest_comp.memory %}
+
+                    <td>{{ no_match_notif }}</td>
+                    <td>0</td>
+                    <td>$0</td>
+                    <td>No updates</td>
+
+                    {% else %}
+
+                    <td>    
+                        <a href="{{ closest_comp.memory.get_source_url}}" class="row-link">
+                            <p>{{ closest_comp.memory }}<p>
+                        </a>
+                    </td>
+                    <td>{{ component_qnty.RAM }}</td>
+                    <td>${{ component_overall_price.RAM | intcomma }}</td>
+                    <td>{{ closest_comp.memory.updated | naturaltime }}</td>
+                  
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th scope="row">Graphics</th>
+                    {% if not closest_comp.graphics_card %}
+
+                    <td>{{ no_match_notif }}</td>
+                    <td>0</td>
+                    <td>$0</td>
+                    <td>No updates</td>
+                   
+                    {% else %}
+
+                    <td>    
+                        <a href="{{ closest_comp.graphics_card.get_source_url}}" class="row-link">
+                            <p>{{ closest_comp.graphics_card }}</p>
+                        </a>
+                    </td>
+                    <td>{{ component_qnty.GPU }}</td>
+                    <td>${{ component_overall_price.GPU | intcomma }}</td>
+                    <td>{{ closest_comp.graphics_card.updated | naturaltime }}</td>
+
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th scope="row">Storage</th>
+                    {% if not closest_comp.storage %}
+                    
+                    <td>{{ no_match_notif }}</td>
+                    <td>0</td>
+                    <td>$0</td>
+                    <td>No updates</td>
+
+                    {% else %}
+
+                    <td>    
+                        <a href="{{ closest_comp.storage.get_source_url}}" class="row-link">
+                            <p>{{ closest_comp.storage }}</p>
+                        </a>
+                    </td>
+                    <td>{{ component_qnty.STR }}</td>
+                    <td>${{ component_overall_price.STR | intcomma }}</td>
+                    <td>{{ closest_comp.storage.updated | naturaltime }}</td>
+                   
+                    {% endif %}
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Total Components Price (in CAD)</th>
+                    <td>{{ total_comps_price }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th colspan="2">Laptop Price (in CAD)</th>
+                    <td>{{ laptop.get_price }}</td>
+                    <td></td>
+                <tr>
+                    <th colspan="2">Price Difference (in CAD)</th>
+                    <td> {{ price_difference }}</td>
+                    <td></td>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}
