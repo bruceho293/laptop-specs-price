@@ -1,0 +1,54 @@
+table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+ 
+thead th {
+    border-bottom: 1px solid black;
+    background-color: var(--tb-bkg);
+}
+
+thead th:nth-child(1) {
+    width: 30%;
+}
+
+th, td {
+    padding: 1em;
+    margin: 1em;
+    position: relative;
+}
+
+tbody tr{
+    background-color: var(--tr-bkg-odd);
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--tr-bkg-even);
+}
+
+tbody tr:hover {
+    background-color: var(--tr-bkg-hover);
+}
+
+td > .row-link {
+    display: flex;
+    text-decoration: none;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+td > .row-link:hover {
+    background-color: var(--tr-link-hover);
+}
+
+td > .row-link > p {
+    color: var(--text);
+    text-align: left;
+    width: fit-content;
+}

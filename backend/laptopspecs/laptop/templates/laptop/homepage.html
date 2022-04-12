@@ -1,0 +1,27 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'laptop/css/base.css'%}">
+<div class="welcome-block">
+    <h1 id="welcome-label">Welcome to Laptop Specs Price</h1>
+    <p class="welcome-description">You can search for laptops with closest matching specification based on memos with the price.</p>
+    <p class="welcome-description"><b>Note:</b>The information accuracy depends on the memos' accuracy.</p>
+</div>
+<br>
+<div id="records-block">
+    <div class="record-col">
+        <p class="quantity">{{ laptop_qnty | intcomma }}</p>
+        <p class="record-type">Laptops</p>
+    </div>
+    <div class="record-col">
+        <p class="quantity">{{ component_qnty | intcomma }}</p>
+        <p class="record-type">Components<br>(CPU, GPU, RAM, Storage)</p>
+    </div>
+    <div class="record-col">
+        <p class="quantity">{{ brand_qnty | intcomma }}</p>
+        <p class="record-type">Brands</p>
+    </div>
+</div>
+{% endblock %}
