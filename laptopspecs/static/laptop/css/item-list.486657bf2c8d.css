@@ -16,7 +16,9 @@ thead th:nth-child(1) {
 
 th, td {
     padding: 1em;
+    margin: 1em;
     position: relative;
+    height: auto;
 }
 
 tbody tr{
@@ -36,6 +38,11 @@ td > .row-link {
     height:fit-content;
     text-decoration: none;
     justify-content: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 td > .row-link:hover {

@@ -9,11 +9,11 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Component)
 class ComponentAdmin(admin.ModelAdmin):
-    list_display = ("name", "brand", "price", "link", "updated")
+    list_display = ("name", "category", "brand", "price", "updated")
     ordering = ['-updated']
 
 @admin.register(Laptop)
 class LaptopAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "brand", "price", "link", "updated")
+    list_display = ("name", "slug", "brand", "price", "updated")
     prepopulated_fields = {"slug": ("name",)}
     ordering = ['-updated']

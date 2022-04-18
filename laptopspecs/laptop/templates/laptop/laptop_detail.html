@@ -9,9 +9,6 @@
     <div id="laptop-header">    
         <div class="laptop-section">
             <h1>{{ laptop }}</h1>
-            {% comment %} <a href="#" class="button-link">
-                Current Search &#8617;
-            </a> {% endcomment %}
         </div>
         <div class="laptop-section">
             <p><b>Updated:</b> {{ laptop.updated | naturaltime }}</p>
@@ -79,7 +76,7 @@
 
                     <td>    
                         <a href="{{ closest_comp.memory.get_source_url}}" class="row-link">
-                            <p>{{ closest_comp.memory }}<p>
+                            <p>{{ closest_comp.memory }}</p>
                         </a>
                     </td>
                     <td>{{ component_qnty.RAM }}</td>
