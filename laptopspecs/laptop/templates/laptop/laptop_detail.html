@@ -133,16 +133,16 @@
             <tfoot>
                 <tr>
                     <th colspan="2">Total Components Price (in CAD)</th>
-                    <td>{{ total_comps_price }}</td>
+                    <td>{{ total_comps_price | floatformat:2 | intcomma }}</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th colspan="2">Laptop Price (in CAD)</th>
-                    <td>{{ laptop.get_price }}</td>
+                    <td>{{ laptop.get_price | intcomma}}</td>
                     <td></td>
                 <tr>
                     <th colspan="2">Price Difference (in CAD)</th>
-                    <td> {{ price_difference }}</td>
+                    <td> {{ price_difference | floatformat:2 | intcomma }}</td>
                     <td></td>
             </tfoot>
         </table>
