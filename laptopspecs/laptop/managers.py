@@ -181,6 +181,7 @@ def get_matching_component(queryset: CategoryQuerySet, memo: QuerySet):
                 )
             
             # Get all components based on the true name
+            # ATTENTION: need more improvement for performance
             qs = capa_qs.filter(name__lower__matchseq=name).order_by('price')
             while not qs.exists() and length > 0:
                 length = length - 1
@@ -203,13 +204,20 @@ def get_matching_component(queryset: CategoryQuerySet, memo: QuerySet):
             length = len(words)
             
             qs = queryset.filter(name__lower__matchseq=name) \
-                .annotate(comp_count=Value(qnty)) \
+                .annotate(
+                    comp_count=Value(qnty),
+                    total_price=ExpressionWrapper(Value(qnty) * F('price'), output_field=FloatField())
+                ) \
                 .order_by('price')
+            # ATTENTION: need more improvement for performance
             while not qs.exists() and length > 1:
                 length = length - 1
                 new_search_name = " ".join(words[:length])
                 qs = queryset.filter(name__lower__matchseq=new_search_name) \
-                    .annotate(comp_count=Value(qnty)) \
+                    .annotate(
+                        comp_count=Value(qnty),
+                        total_price=ExpressionWrapper(Value(qnty) * F('price'), output_field=FloatField())
+                        ) \
                     .order_by('price')
 
             qs = qs[:1]
