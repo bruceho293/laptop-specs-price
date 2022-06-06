@@ -10,4 +10,5 @@ tmp/
 *.pyc
 __pycache__
 db.sqlite3
+test_function.py
 media
