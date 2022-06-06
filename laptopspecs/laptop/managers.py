@@ -181,14 +181,13 @@ def get_matching_component(queryset: CategoryQuerySet, memo: QuerySet):
                 )
             
             # Get all components based on the true name
-            # ATTENTION: need more improvement for performance
+            # ATTENTION: need improvement for performance
             qs = capa_qs.filter(name__lower__matchseq=name).order_by('price')
             while not qs.exists() and length > 0:
                 length = length - 1
                 new_search_name = " ".join(words[:length])
                 qs = capa_qs.filter(name__lower__matchseq=new_search_name).order_by('price')
 
-            # If qs is empty, then increase the size based on the quantity
 
             qs = qs[:1]
             if component == None:
@@ -209,7 +208,7 @@ def get_matching_component(queryset: CategoryQuerySet, memo: QuerySet):
                     total_price=ExpressionWrapper(Value(qnty) * F('price'), output_field=FloatField())
                 ) \
                 .order_by('price')
-            # ATTENTION: need more improvement for performance
+            # ATTENTION: need improvement for performance
             while not qs.exists() and length > 1:
                 length = length - 1
                 new_search_name = " ".join(words[:length])
