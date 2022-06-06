@@ -2,9 +2,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.list import ListView
 from django.views.generic import DetailView
+from django.db.models import F
 
-from laptop.models import Laptop, Component, Brand
-from laptop.forms import LaptopForm
+from laptop.models import Laptop, Component, Brand, Memo
+from laptop.managers import ComponentType
 
 # Create your views here.
 
@@ -51,48 +52,46 @@ class LaptopInfo(DetailView):
         # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
 
+        # Get the laptop and its memos
         laptop = self.get_object()
+        memos = Memo.objects.filter(note_detail__laptop=laptop).annotate(qnty=F('note_detail__qnty')).order_by('name')
+        cpu = memos.filter(category=ComponentType.CPU)  
+        ram = memos.filter(category=ComponentType.RAM)
+        gpu = memos.filter(category=ComponentType.GPU)
+        disk = memos.filter(category=ComponentType.DISK)
+
+        memos = {
+            'cpu': cpu,
+            'ram': ram,
+            'gpu': gpu,
+            'disk': disk
+        }
 
         closest_component = {
-            'processor': Component.category_manager.get_closest_processor(laptop.processor),
-            'memory': Component.category_manager.get_closest_memory_chip(laptop.memory),
-            'graphics_card': Component.category_manager.get_closest_graphics_card(laptop.graphics),
-            'storage': Component.category_manager.get_closest_storage(laptop.storage) 
+            'processor': Component.category_manager.get_closest_processor(cpu),
+            'memory': Component.category_manager.get_closest_memory_chip(ram),
+            'graphics_card': Component.category_manager.get_closest_graphics_card(gpu),
+            'storage': Component.category_manager.get_closest_storage(disk) 
         }
 
-        qnty = laptop.qnty.split(',')
-        component_qnty = {
-            'CPU': int(qnty[0]),
-            'RAM': int(qnty[1]),
-            'GPU': int(qnty[2]),
-            'STR': int(qnty[3]),
-        }
-
-        component_per_price = {
-            'CPU': closest_component['processor'].get_price if closest_component['processor'] else 0,
-            'RAM': closest_component['memory'].get_price if closest_component['memory'] else 0,
-            'GPU': closest_component['graphics_card'].get_price if closest_component['graphics_card'] else 0,
-            'STR': closest_component['storage'].get_price if closest_component['storage'] else 0,
-        }
-
-        component_overall_price = {
-            'CPU': component_qnty['CPU'] * float(component_per_price['CPU']),
-            'RAM': component_qnty['RAM'] * float(component_per_price['RAM']),
-            'GPU': component_qnty['GPU'] * float(component_per_price['GPU']),
-            'STR': component_qnty['STR'] * float(component_per_price['STR']),
-        }
-
-        total_comps_price = sum(component_overall_price.values())
+        total_comps_price = 0
+        for category_comp in closest_component.keys():
+            components = closest_component[category_comp]
+            if components.exists():
+                for component in components:
+                    count = component.comp_count
+                    price = component.get_price
+                    total_comps_price += float(price) * count
+                
 
         price_difference = float(laptop.get_price) - total_comps_price
 
         no_match_notif = "No Matching Component"
 
         context['laptop'] = laptop
+        context['memos'] = memos
         context['closest_comp'] = closest_component
         context['no_match_notif'] = no_match_notif
-        context['component_qnty'] = component_qnty
-        context['component_overall_price'] = component_overall_price
         context['total_comps_price'] = total_comps_price
         context['price_difference'] = price_difference
 

@@ -1,10 +1,15 @@
 from django.db import models
-from django.db.models import Field, Lookup, Transform, CharField, TextField
+from django.db.models import Field, Lookup, Transform, CharField
+from django.db.models import QuerySet, FloatField, TextField
+from django.db.models import F, Value, Case, When, ExpressionWrapper
+from django.db.models.functions import Cast, Round
 from django.utils.translation import gettext_lazy as _
 from django.db import connection
 
 from common.util.regex_matching import text_to_seq_pattern
-import re
+from common.util.unit import unit_conversion
+
+from laptop.functions import SubStrRegex
 
 class LowerCase(Transform):
     lookup_name = 'lower'
@@ -68,27 +73,155 @@ class CategoryManager(models.Manager):
         Get the "closest" associated components based on the name
         of the components recorded from the laptop's attributes.
         "Closest" means the component would have similar/identical name
-        compared to the names/descriptions given from the laptop with 
+        compared to the names/descriptions in the memos given from the laptop with 
         the lowest possible price. If there's no matches, return the component
-        in the category with the lowest price 
+        in the same category with the lowest price 
     '''
-    def get_closest_processor(self, name):
-        return get_matching_component(queryset=self.get_processors(), name=name)
+    def get_closest_processor(self, memo):
+        return get_matching_component(queryset=self.get_processors(), memo=memo)
     
-    def get_closest_graphics_card(self, name):
-        return get_matching_component(queryset=self.get_graphics_cards(), name=name)
+    def get_closest_graphics_card(self, memo):
+        return get_matching_component(queryset=self.get_graphics_cards(), memo=memo)
     
-    def get_closest_memory_chip(self, name):
-        return get_matching_component(queryset=self.get_memory_chips(), name=name)
+    def get_closest_memory_chip(self, memo):
+        return get_matching_component(queryset=self.get_memory_chips(), memo=memo)
     
-    def get_closest_storage(self, name):
-        return get_matching_component(queryset=self.get_storages(), name=name)
+    def get_closest_storage(self, memo):
+        return get_matching_component(queryset=self.get_storages(), memo=memo)
 
 
-def get_matching_component(queryset: CategoryQuerySet, name):
-    if not queryset.filter(name__lower__matchseq=name).exists():
-        return queryset.order_by('price').first()
-    return queryset.filter(name__lower__matchseq=name).order_by('price').first()
+def get_matching_component(queryset: CategoryQuerySet, memo: QuerySet):
+    # memo: a QuerySet of Memo model
+    # Extra fields:
+    #     qnty - the quantity of the component/memo (1 type of component) associated with the laptop.
+
+    # Set up the set of matching components
+    component = None
+    # Check if the component has capacity
+    has_capacity = memo[0].has_capacity
+    # Prepare Regex pattern for components having capacity
+    CAPACITY_REGEX = '^[0-9]{1,3} [TGM]B'
+    UNIT_SIZE_REGEX = '^[0-9]{1,3}'
+    UNIT_REGEX = '[TGM]B'
+ 
+    if has_capacity:
+        for comp_memo in memo:
+            # Get the true name of the component after extracting the capacity 
+            name = comp_memo.get_true_name
+            qnty = comp_memo.qnty
+            words = name.split(" ")
+            length = len(words)
+            
+            # Check if the any matching component based on both capacity and quantity
+            #     Ex: 4 GB <name of the memory card> with qnty = 2
+            #         Step 1: Check if there exists a component matching the name that has capacity 4 GB.
+            #            If yes, return the matching component, if not move to Step 2.
+            #         Step 2: Similar to Step 1 but the capacity is now 8 GB.
+            #            Qnty decrease: 2 --> 1
+            size_in_int, capacity_unit = comp_memo.get_capacity
+            
+            # Get all the component that can be matched based on capacity compatibility. 
+            # Use CASE WHEN in Django ORM with Alias()
+            # 
+            # In PostgreSQL Reference Query if the capacity in the memo is  8 GB
+            #   
+            #       WITH capacity_comp AS (
+            #       	SELECT *, 
+            #               CASE 
+            #                   WHEN SUBSTRING(name, 1, 6) ~ '^[0-9]{1,3} [TGM]B' THEN SUBSTRING(name, '^[0-9]{1,3} [TGM]B')
+            #       	        ELSE 'No capacity'
+            #               END AS Capacity
+            #           FROM laptop_component
+            #           WHERE category='RAM'
+            #       ), convert_comp AS (
+            #       	SELECT CC.name, 
+            #       	    CAST(SUBSTRING(CC.Capacity, '^[0-9]{1,3}') AS INTEGER) AS storage_size,
+            #       	    CASE
+            #       	        WHEN SUBSTRING(CC.Capacity, '[TGM]B') ~ 'GB' THEN '1000'::integer
+            #       	        WHEN SUBSTRING(CC.Capacity, '[TGM]B') ~ 'TB' THEN '1000000'::integer
+            #       	        ELSE '1'::integer
+            #       	    END AS unit_conversion
+            #       	FROM capacity_comp CC
+            #       )
+            #       SELECT C_C.name, 
+            #           C_C.storage_size,
+            #           C_C.unit_conversion,
+            #       	C_C.storage_size * C_C.unit_conversion / (8::numeric * 1000) as comp_count
+            #       FROM convert_comp C_C;
+
+            capa_qs = queryset.alias(capacity=SubStrRegex('name', Value(CAPACITY_REGEX))) \
+                .annotate(
+                    # Create fields to store the unit size and the capacity unit
+                    unit_size=Cast(SubStrRegex('capacity', Value(UNIT_SIZE_REGEX)), output_field=FloatField()), 
+                    unit=SubStrRegex('capacity', Value(UNIT_REGEX), output_field=TextField())) \
+                .annotate(
+                    # Convert the value of the unit accordingly
+                    unit_in_num=Case(
+                        When(unit__iexact='TB', then=Value(10**6, output_field=FloatField())),
+                        When(unit__iexact='GB', then=Value(10**3, output_field=FloatField())),
+                        default=Value(1, output_field=FloatField())
+                    )
+                ) \
+                .annotate(
+                    # Get the calculated count of the component compared to the that specific memo
+                    comp_count=ExpressionWrapper(
+                        (Value(size_in_int, output_field=FloatField()) / F('unit_size'))
+                        * 
+                        (Value(unit_conversion(capacity_unit), output_field=FloatField()) / F('unit_in_num'))
+                    ,output_field=FloatField())
+                ) \
+                .filter(
+                    #  Only collect the appropriate component
+                    comp_count__gte=1
+                ) \
+                .annotate(
+                    # Update each component with the new count and Calculate the total price
+                    comp_count=Round(F('comp_count') * Value(qnty), output_field=FloatField()),
+                    total_price=ExpressionWrapper(Round(F('comp_count') * Value(qnty), output_field=FloatField()) * F('price'), output_field=FloatField())
+                )
+            
+            # Get all components based on the true name
+            qs = capa_qs.filter(name__lower__matchseq=name).order_by('price')
+            while not qs.exists() and length > 0:
+                length = length - 1
+                new_search_name = " ".join(words[:length])
+                qs = capa_qs.filter(name__lower__matchseq=new_search_name).order_by('price')
+
+            # If qs is empty, then increase the size based on the quantity
+
+            qs = qs[:1]
+            if component == None:
+                component = qs
+            else:
+                component = component.union(qs)
+
+    else: # When components do not have capacity
+        for comp_memo in memo:
+            name = comp_memo.get_true_name
+            qnty = comp_memo.qnty
+            words = name.split(" ")
+            length = len(words)
+            
+            qs = queryset.filter(name__lower__matchseq=name) \
+                .annotate(comp_count=Value(qnty)) \
+                .order_by('price')
+            while not qs.exists() and length > 1:
+                length = length - 1
+                new_search_name = " ".join(words[:length])
+                qs = queryset.filter(name__lower__matchseq=new_search_name) \
+                    .annotate(comp_count=Value(qnty)) \
+                    .order_by('price')
+
+            qs = qs[:1]
+            if component == None:
+                component = qs
+            else:
+                component = component.union(qs)
+    
+    return component
+
+    # For MongoDB
+
     # name_pattern = text_to_seq_pattern(name)
     # regex = re.compile(name_pattern, re.IGNORECASE)
 

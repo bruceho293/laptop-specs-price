@@ -11,9 +11,9 @@
             <h1>{{ laptop }}</h1>
         </div>
         <div class="laptop-section">
-            <p><b>Updated:</b> {{ laptop.updated | naturaltime }}</p>
+            <p><b>Updated:</b> {{ laptop.updated|naturaltime }}</p>
             <p><b>Brand:</b> {{ laptop.brand }}</p>
-            <p><b>Price (in CAD):</b> ${{ laptop.get_price | intcomma }}</p>
+            <p><b>Price (in CAD):</b> ${{ laptop.get_price|intcomma }}</p>
             <a href="{{ laptop.get_source_url }}" class="button-link">
                 Go to Source
             </a>
@@ -22,10 +22,10 @@
     <hr>
     <div class="laptop-memo">
         <h2>MEMO</h2>
-        <p><b>Processor: </b> {{ laptop.processor }}</p>
-        <p><b>Memory: </b> {{ laptop.memory }}</p>
-        <p><b>Graphics: </b> {{ laptop.graphics }}</p>
-        <p><b>Storage: </b> {{ laptop.storage }}</p> 
+        <p><b>Processor: </b> {{ memos.cpu|join:', ' }}</p>
+        <p><b>Memory: </b> {{ memos.ram|join:', ' }}</p>
+        <p><b>Graphics: </b> {{ memos.gpu|join:', ' }}</p>
+        <p><b>Storage: </b> {{ memos.disk|join:', ' }}</p> 
     </div>
     <hr>
     <div class="laptop-specs-price">
@@ -41,108 +41,115 @@
                 </tr>
             </thead>
             <tbody>
+                {% if not closest_comp.processor %}
                 <tr>
                     <th scope="row">Processor</th>
-                    {% if not closest_comp.processor %}
-                    
                     <td>{{ no_match_notif }}</td>
                     <td>0</td>
                     <td>$0</td>
                     <td>No updates</td>
-                   
-                    {% else %}
-                    
+                </tr>
+                {% else %}
+                {% for processor in closest_comp.processor %}
+                <tr>
+                    <th scope="row">Processor</th>
                     <td>    
-                        <a href="{{ closest_comp.processor.get_source_url}}" class="row-link">
-                            <p>{{ closest_comp.processor }}</p>
+                        <a href="{{ processor.get_source_url}}" class="row-link">
+                            <p>{{ processor }}</p>
                         </a>
                     </td>
-                    <td>{{ component_qnty.CPU }}</td>
-                    <td>${{ component_overall_price.CPU | intcomma }}</td>
-                    <td>{{ closest_comp.processor.updated | naturaltime }}</td>
-                    
-                    {% endif %}
+                    <td>{{ processor.comp_count|floatformat|intcomma }}</td>
+                    <td>${{ processor.total_price|intcomma }}</td>
+                    <td>{{ processor.updated|naturaltime }}</td>
                 </tr>
+                {% endfor %}
+                {% endif %}
+                
+                {% if not closest_comp.memory %}
                 <tr>
                     <th scope="row">Memory</th>
-                    {% if not closest_comp.memory %}
-
                     <td>{{ no_match_notif }}</td>
                     <td>0</td>
                     <td>$0</td>
                     <td>No updates</td>
-
-                    {% else %}
-
+                </tr>
+                {% else %}
+                {% for memory in closest_comp.memory %}
+                <tr>
+                    <th scope="row">Memory</th>
                     <td>    
-                        <a href="{{ closest_comp.memory.get_source_url}}" class="row-link">
-                            <p>{{ closest_comp.memory }}</p>
+                        <a href="{{ memory.get_source_url}}" class="row-link">
+                            <p>{{ memory }}</p>
                         </a>
                     </td>
-                    <td>{{ component_qnty.RAM }}</td>
-                    <td>${{ component_overall_price.RAM | intcomma }}</td>
-                    <td>{{ closest_comp.memory.updated | naturaltime }}</td>
-                  
-                    {% endif %}
+                    <td>{{ memory.comp_count|floatformat|intcomma }}</td>
+                    <td>${{ memory.total_price|intcomma }}</td>
+                    <td>{{ memory.updated|naturaltime }}</td>
                 </tr>
+                {% endfor %}
+                {% endif %}
+
+                {% if not closest_comp.graphics_card %}
                 <tr>
                     <th scope="row">Graphics</th>
-                    {% if not closest_comp.graphics_card %}
-
                     <td>{{ no_match_notif }}</td>
                     <td>0</td>
                     <td>$0</td>
                     <td>No updates</td>
-                   
-                    {% else %}
-
+                </tr>
+                {% else %}
+                {% for graphics in closest_comp.graphics_card %}
+                <tr>
+                    <th scope="row">Graphics</th>
                     <td>    
-                        <a href="{{ closest_comp.graphics_card.get_source_url}}" class="row-link">
-                            <p>{{ closest_comp.graphics_card }}</p>
+                        <a href="{{ graphics.get_source_url}}" class="row-link">
+                            <p>{{ graphics }}</p>
                         </a>
                     </td>
-                    <td>{{ component_qnty.GPU }}</td>
-                    <td>${{ component_overall_price.GPU | intcomma }}</td>
-                    <td>{{ closest_comp.graphics_card.updated | naturaltime }}</td>
-
-                    {% endif %}
+                    <td>{{ graphics.comp_count|floatformat|intcomma }}</td>
+                    <td>${{ graphics.total_price|intcomma }}</td>
+                    <td>{{ graphics.updated|naturaltime }}</td>
                 </tr>
+                {% endfor %}
+                {% endif %}
+
+                {% if not closest_comp.storage %}
                 <tr>
                     <th scope="row">Storage</th>
-                    {% if not closest_comp.storage %}
-                    
                     <td>{{ no_match_notif }}</td>
                     <td>0</td>
                     <td>$0</td>
                     <td>No updates</td>
-
-                    {% else %}
-
+                </tr>
+                {% else %}
+                {% for storage in closest_comp.storage %}
+                <tr>
                     <td>    
-                        <a href="{{ closest_comp.storage.get_source_url}}" class="row-link">
-                            <p>{{ closest_comp.storage }}</p>
+                        <a href="{{ storage.get_source_url}}" class="row-link">
+                            <p>{{ storage }}</p>
                         </a>
                     </td>
-                    <td>{{ component_qnty.STR }}</td>
-                    <td>${{ component_overall_price.STR | intcomma }}</td>
-                    <td>{{ closest_comp.storage.updated | naturaltime }}</td>
-                   
-                    {% endif %}
+                    <td>{{ storage.comp_count|floatformat|intcomma }}</td>
+                    <td>${{ storage.total_price|intcomma }}</td>
+                    <td>{{ storage.updated|naturaltime }}</td>
                 </tr>
+                {% endfor %}
+                {% endif %}
+                
             </tbody>
             <tfoot>
                 <tr>
                     <th colspan="2">Total Components Price (in CAD)</th>
-                    <td>{{ total_comps_price | floatformat:2 | intcomma }}</td>
+                    <td>{{ total_comps_price|floatformat:2|intcomma }}</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th colspan="2">Laptop Price (in CAD)</th>
-                    <td>{{ laptop.get_price | intcomma}}</td>
+                    <td>{{ laptop.get_price|intcomma}}</td>
                     <td></td>
                 <tr>
                     <th colspan="2">Price Difference (in CAD)</th>
-                    <td> {{ price_difference | floatformat:2 | intcomma }}</td>
+                    <td> {{ price_difference|floatformat:2| intcomma }}</td>
                     <td></td>
             </tfoot>
         </table>
