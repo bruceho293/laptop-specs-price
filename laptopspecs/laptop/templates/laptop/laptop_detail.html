@@ -124,6 +124,7 @@
                 {% else %}
                 {% for storage in closest_comp.storage %}
                 <tr>
+                    <th scope="row">Storage</th>
                     <td>    
                         <a href="{{ storage.get_source_url}}" class="row-link">
                             <p>{{ storage }}</p>
