@@ -115,7 +115,7 @@ class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = LaptopDetailSerializer(laptop)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True)
+    @action(detail=True, url_path='get-matching-components')
     def get_matching_components(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
         
