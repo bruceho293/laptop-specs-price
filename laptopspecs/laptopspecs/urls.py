@@ -25,7 +25,7 @@ from rest_framework import routers
 from laptop import views
 
 router = routers.DefaultRouter()
-router.register(r'laptops', views.LaptopViewSet, basename='laptops')
+router.register(r'laptops', views.LaptopViewSet, basename='laptop')
 router.register(r'components', views.ComponentViewSet, basename='component')
 
 urlpatterns = [
@@ -33,7 +33,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('laptop/', include('laptop.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api/', include(router.urls)),
+    path('api/', include(router.urls), name='api'),
     path('', views.homepage, name="homepage"),
 ]
 
