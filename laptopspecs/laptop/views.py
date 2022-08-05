@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404, render
 from django.views.generic.list import ListView
 from django.views.generic import DetailView
 from django.db.models import F
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
@@ -88,7 +90,7 @@ class LaptopInfo(DetailView):
                     total_comps_price += float(price) * count
                 
 
-        price_difference = float(laptop.get_price) - total_comps_price
+        price_difference = total_comps_price - float(laptop.get_price)
 
         no_match_notif = "No Matching Component"
 
@@ -106,15 +108,18 @@ class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
 
+    @method_decorator(cache_page(60*60*2))
     def list(self, request):
         serializer = LaptopListSerializer(self.queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @method_decorator(cache_page(60*60*2))
     def retrieve(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
         serializer = LaptopDetailSerializer(laptop)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @method_decorator(cache_page(60*60*2))
     @action(detail=True, url_path='get-matching-components')
     def get_matching_components(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
