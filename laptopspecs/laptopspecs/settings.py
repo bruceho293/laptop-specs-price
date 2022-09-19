@@ -170,6 +170,13 @@ JAZZMIN_SETTINGS = {
 
     # Whether to aut expand the menu
     "navigation_expanded": True,
+
+}
+
+JAZZMIN_UI_TWEAKS = {
+    # Theme
+    "theme": "cosmo",
+    "dark_mode_theme": "superhero",
 }
 
 # Logging
