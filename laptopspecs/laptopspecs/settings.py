@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['localhost', 'ltxp.herokuapp.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -152,6 +153,23 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
+
+# Admin UI (with Jazzmin)
+JAZZMIN_SETTINGS = {
+    "site_title": "LTXP Database Administrative",
+    "site_header": "LTXP DB Admin",
+    "site_brand": "LTXP",
+    "welcome_sign": "Welcome to the Laptop Specs Price Admin",
+
+    # Copyright on the footer
+    "copyright": "Acme Library Ltd",
+
+    # Whether to display the side menu
+    "show_sidebar": True,
+
+    # Whether to aut expand the menu
+    "navigation_expanded": True,
 }
 
 # Logging
