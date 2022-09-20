@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', 'ltxp.herokuapp.com']
+ALLOWED_HOSTS = ['localhost', 'ltxp.herokuapp.com', '18.217.135.159']
 
 
 # Application definition
