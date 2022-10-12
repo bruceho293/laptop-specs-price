@@ -10,8 +10,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
 
     steps:
     - name: Set GitHub Action Env
@@ -28,5 +26,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       working-directory: laptopspecs
+      env:
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       run: |
         python manage.py test
