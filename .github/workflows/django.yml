@@ -9,6 +9,10 @@ on:
 jobs:
   build:
 
+    environment: Django
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL}}
     runs-on: ubuntu-latest
 
     steps:
@@ -26,9 +30,5 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       working-directory: laptopspecs
-      environment: Django
-      env:
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL}}
       run: |
         python manage.py test
