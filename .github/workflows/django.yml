@@ -10,8 +10,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-
 
     steps:
     - name: Set GitHub Action Env
