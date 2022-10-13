@@ -108,7 +108,7 @@ DATABASES = {
 
 # Create a local database for testing in Github Actions
 if platform == "linux":
-    DATABASES['default']['TEST'] = { 'MIRROR': 'test' }
+    DATABASES['default'] = DATABASES['test']
 
 # Database Connection with dj_database_url
 # db_from_env = dj_database_url.config(default=os.getenv("DATABASE_URL"), conn_max_age=600, ssl_require=True)
