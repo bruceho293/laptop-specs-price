@@ -73,6 +73,8 @@ class LaptopInfo(DetailView):
             'disk': disk
         }
 
+        # Get the matching components.
+        # Calculate the total price of the components.
         closest_component = {
             'processor': Component.category_manager.get_closest_processor(cpu),
             'memory': Component.category_manager.get_closest_memory_chip(ram),

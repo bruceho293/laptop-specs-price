@@ -24,7 +24,7 @@ class LaptopTest(APITestCase):
         Component.objects.create(name="Graphics Card LD 2", category='GPU', price=1.1, brand=brand, link="Link 10")
         Component.objects.create(name="256 GB Extra Large Storage 1", category='DISK', price=1.1, brand=brand, link="Link 10")
 
-        
+    # Retrieve the detail of a single laptop.    
     def test_get_single_laptop(self):
         response = self.client.get(reverse('laptop-detail', kwargs={'slug': 'sample-laptop'}))
         self.assertEquals(response.status_code, status.HTTP_200_OK)
@@ -32,6 +32,7 @@ class LaptopTest(APITestCase):
         response = self.client.get(reverse('laptop-detail', kwargs={'slug': 'nonexisted-slug-name'}))
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    # Retrieve the information about the matching components.
     def test_get_matching_laptop(self):
         response = self.client.get(reverse('laptop-get-matching-components', kwargs={'slug': 'sample-laptop'}))
         self.assertEquals(response.status_code, status.HTTP_200_OK)
