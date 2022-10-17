@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-from sys import platform
+import platform
 
 # import dj_database_url
 
@@ -107,7 +107,7 @@ DATABASES = {
 }
 
 # Create a local database for testing in Github Actions
-if platform == "linux":
+if platform.system() == "Linux" and not platform.release() == os.getenv("HOST_VERSION_RELEASE"):
     DATABASES['default'] = DATABASES['test']
 
 # Database Connection with dj_database_url
