@@ -4,7 +4,6 @@ from django.db.models import QuerySet, FloatField, TextField
 from django.db.models import F, Value, Case, When, ExpressionWrapper
 from django.db.models.functions import Cast, Round
 from django.utils.translation import gettext_lazy as _
-from django.db import connection
 
 from common.util.regex_matching import text_to_seq_pattern
 from common.util.unit import unit_conversion
