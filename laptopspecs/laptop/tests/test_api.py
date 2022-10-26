@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 
 from laptop.models import Brand, Memo, LaptopNote, Laptop, Component
 
-class LaptopTest(APITestCase):
+class LaptopAPITestCase(APITestCase):
     def setUp(self):
         brand = Brand.objects.create(name="Brand", link="url.com")
 

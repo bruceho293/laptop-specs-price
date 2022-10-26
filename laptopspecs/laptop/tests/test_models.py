@@ -1,11 +1,10 @@
 from django.test import TestCase
 from django.db.models import F
-from datetime import datetime
 
 from laptop.models import Brand, Component, Laptop, Memo, LaptopNote
 
 
-class ComponentTest(TestCase):
+class LaptopTestCase(TestCase):
     
     @classmethod
     def setUpTestData(cls):
