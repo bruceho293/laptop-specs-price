@@ -32,7 +32,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', 'ltxp.herokuapp.com', '18.217.135.159']
+ALLOWED_HOSTS = ['localhost', '18.217.135.159']
 
 
 # Application definition
@@ -90,6 +90,10 @@ WSGI_APPLICATION = 'laptopspecs.wsgi.application'
 
 # Database Connection with psycopg2
 DATABASES = {
+    # 'default': {
+    #   'ENGINE': 'django.db.backends.sqlite3',
+    #   'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv("DB_NAME"),
@@ -173,7 +177,8 @@ REST_FRAMEWORK = {
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -181,6 +186,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
+
+# Oauth2 Provider
+OAUTH_PROVIDER = {
+  'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
 }
 
 # Admin UI (with Jazzmin)
