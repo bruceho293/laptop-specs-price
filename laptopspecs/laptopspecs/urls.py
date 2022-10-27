@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf.urls import handler404
 from django.conf import settings
+from django.shortcuts import redirect
 from django.urls import path, include, re_path
 from django.views.static import serve
 
@@ -28,9 +29,16 @@ router = routers.DefaultRouter()
 router.register(r'laptops', views.LaptopViewSet, basename='laptop')
 router.register(r'components', views.ComponentViewSet, basename='component')
 
+def account_redirect(request):
+  print(request)
+  response = redirect("/admin/")
+  return response
+
 urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name="admin"),
+    # path('accounts/', account_redirect, name="account_auth"),
+    path('o/', include('oauth2_provider.urls', namespace='oath2_provider')),
     path('laptop/', include('laptop.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls), name='api'),
