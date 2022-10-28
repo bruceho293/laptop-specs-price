@@ -39,6 +39,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name="admin"),
     # path('accounts/', account_redirect, name="account_auth"),
     path('o/', include('oauth2_provider.urls', namespace='oath2_provider')),
+    path('user/', include('user.urls')),
     path('laptop/', include('laptop.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls), name='api'),
