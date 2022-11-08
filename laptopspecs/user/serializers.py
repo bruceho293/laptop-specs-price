@@ -3,11 +3,11 @@ from rest_framework import serializers
 from user.models import UserImpression, UserProfile
 
 class UserImpressionSerializer(serializers.ModelSerializer):
-    laptop_name = serializers.CharField(source="laptop.name", read_only=True)
+    laptop_id = serializers.IntegerField(source="laptop.id", read_only=True)
     
     class Meta:
         model = UserImpression
-        fields = ['laptop_name', 'liked']
+        fields = ['laptop_id', 'liked']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
