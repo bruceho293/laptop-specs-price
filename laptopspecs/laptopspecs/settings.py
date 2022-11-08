@@ -144,7 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'EST'
 
 USE_I18N = True
 
@@ -191,6 +191,9 @@ REST_FRAMEWORK = {
 # Oauth2 Provider
 OAUTH_PROVIDER = {
   'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
+  'ACCESS_TOKEN_EXPIRE_SECONDS': 86400,
+  'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,
+  'CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL': 0.1,
 }
 
 # Admin UI (with Jazzmin)
