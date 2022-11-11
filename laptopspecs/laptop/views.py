@@ -46,8 +46,6 @@ class LaptopSearchList(ListView):
         context['quantity'] = self.get_queryset().count()
         return context
     
-    
-
 class LaptopInfo(DetailView):
     model = Laptop
     template = 'laptop/laptop_detail.html'
