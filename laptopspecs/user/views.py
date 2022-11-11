@@ -3,13 +3,18 @@ from django.shortcuts import render
 from rest_framework import generics, authentication, permissions
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 
-from user.serializers import UserProfileSerializer
+from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer
 from user.models import UserProfile
 
 # Create your views here.
 class UserDetail(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileDetailSerializer
     lookup_field = 'user__username'
     lookup_url_kwarg = 'username'
+
+class UserRegister(generics.CreateAPIView):
+    permission_classes = [permissions.AllowAny]
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileRegisterSerializer
