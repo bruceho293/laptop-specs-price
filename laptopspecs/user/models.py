@@ -17,6 +17,9 @@ class UserProfile(models.Model):
     objects = models.Manager()
     custom_manager = UserProfileCustomManager()
 
+    def __str__(self):
+        return self.user.username
+
     def like_laptop(self, laptop_name):
         user_impression = UserImpression.objects.filter(profile=self, laptop__name=laptop_name)
         if user_impression.exists():
