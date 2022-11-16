@@ -27,32 +27,58 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
 class UserProfileRegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", required=True)
     email = serializers.EmailField(source="user.email", required=True)
-    password = serializers.CharField(source="user.password,", required=True)
+    password = serializers.CharField(source="user.password", required=True, write_only=True)
 
     class Meta:
         model = UserProfile
         fields = ['username', 'email', 'password']
 
     def validate(self, attrs):
-        username = attrs['username']
-        email = attrs['email']
-
-        if User.objects.filter(username=username).exists():
+        current_user = attrs.get('user')
+        if current_user is None:
             raise serializers.ValidationError(
-              {"username": "The username already exists."}
+              {"user": "There's no User object for validation."}
             )
-        if User.objects.filter(email=email).exists():
+        
+        current_username = current_user.get('username')
+        current_email = current_user.get('email')
+        current_password = current_user.get('password')
+
+        if current_username is None:
             raise serializers.ValidationError(
-              {"email": "The email already exists."}
+                {"username": "The username cannot be empty."}
+            )
+        if current_email is None:
+            raise serializers.ValidationError(
+                {"email": "The email cannot be empty."}
+            )
+        if current_password is None:
+            raise serializers.ValidationError(
+                {"password": "The password cannot be empty."}
+            )
+        if User.objects.filter(username=current_username).exists():
+            raise serializers.ValidationError(
+                {"username": "The username already exists."}
+            )
+        if User.objects.filter(email=current_email).exists():
+            raise serializers.ValidationError(
+                {"email": "The email already exists."}
             )
 
         return attrs
     
     def create(self, validated_data):
-        user_profile = UserProfile.custom_manager.create_user_profile(
-          username=validated_data['username'],
-          email=validated_data['email'],
-          password=validated_data['password']
+        validated_user = validated_data['user']
+        
+        validated_username = validated_user['username']
+        validated_email = validated_user['email']
+        validated_password = validated_user['password']
+
+        UserProfile.custom_manager.create_user_profile(
+          username=validated_username,
+          email=validated_email,
+          password=validated_password
         )
-        return user_profile
+        
+        return UserProfile.objects.get(user__username=validated_username)
 
