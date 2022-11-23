@@ -1,17 +1,48 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, JsonResponse
+from django.urls import reverse
+from django.utils.http import urlencode
 
 from rest_framework import generics, status
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 
-import json
-
 from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer
 from user.models import UserProfile
+from user.decorators import get_request_user
+from django.contrib.auth.models import User
 
-# Create your views here.
+# Create your views here
+@api_view(['GET'])
+@get_request_user
+def authorize(request):
+    """
+    Intermediate Custom Oauth2 Authorization Request.
+    """
+    data = {
+      'user': str(request.user),
+      'is_authenticated': request.user.is_authenticated
+    }
+    return Response(data=data)
+
+@api_view(['POST'])
+def get_token(request):
+    """
+    Intermediate Custom Oauth2 Token Request.
+    """
+    pass
+
+@api_view(['POST'])
+def revoke_token(request):
+    """
+    Intermediate Custom Oauth2 Authorization Request.
+    """
+    pass
+
 class UserDetail(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
     queryset = UserProfile.objects.all()
@@ -33,8 +64,8 @@ class UserLogin(APIView):
         The response should have the access token and refresh token.
         """
         
-        # Get username and password.
-        data = json.loads(request.body)
+        # Get all necessary variables.
+        data = request.data
         username = data.get('username')
         password = data.get('password')
 
@@ -47,9 +78,12 @@ class UserLogin(APIView):
         if user is not None:
             # Successful Login.
             # Start Oauth2 Authorization.
-            pass
+            login(request=request, user=user)
+            content = {
+               'user': str(request.user),
+               'is_authenticated': request.user.is_authenticated
+            }
+            return Response(content)
         else:
-            return Response(data="Invalid user credentials !", status=status.HTTP_401_UNAUTHORIZED)
-        
-
+            return Response(data={"error":"Invalid user credentials!"}, status=status.HTTP_401_UNAUTHORIZED)
 

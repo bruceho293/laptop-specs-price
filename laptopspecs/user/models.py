@@ -13,7 +13,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE, primary_key=True)
     avatar = models.ImageField(upload_to=user_directory_path)
     imp_laptop = models.ManyToManyField(Laptop, related_name="laptop_impression", through="UserImpression", through_fields=('profile', 'laptop'))
-    
+
     objects = models.Manager()
     custom_manager = UserProfileCustomManager()
 

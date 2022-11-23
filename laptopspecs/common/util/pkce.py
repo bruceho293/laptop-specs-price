@@ -9,5 +9,5 @@ code_verifier = base64.urlsafe_b64encode(code_verifier.encode('utf-8'))
 code_challenge = hashlib.sha256(code_verifier).digest()
 code_challenge = base64.urlsafe_b64encode(code_challenge).decode('utf-8').replace('=', '')
 
-print(code_verifier)
-print(code_challenge)
+print('Verifier: {}'.format(code_verifier))
+print('Challenge: {}'.format(code_challenge))

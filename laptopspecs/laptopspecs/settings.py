@@ -14,6 +14,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 import platform
+from corsheaders.defaults import default_headers
 
 # import dj_database_url
 
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
 
     'oauth2_provider',
     'rest_framework',
+    'corsheaders',
     'laptop.apps.LaptopConfig',
     'user.apps.UserConfig',
 ]
@@ -56,9 +58,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -177,8 +181,7 @@ REST_FRAMEWORK = {
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -188,12 +191,25 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
+# CORS Headers
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000' ,# For React Front end during development
+]
+
+CORS_ORIGIN_WHITELIST = [
+    'https://localhost:3000',
+]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-user",
+]
+
 # Oauth2 Provider
 OAUTH_PROVIDER = {
-  'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
-  'ACCESS_TOKEN_EXPIRE_SECONDS': 86400,
-  'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,
-  'CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL': 0.1,
+    'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 86400,
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,
+    'CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL': 0.1,
 }
 
 # Admin UI (with Jazzmin)
