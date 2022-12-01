@@ -181,7 +181,7 @@ REST_FRAMEWORK = {
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -211,6 +211,11 @@ OAUTH_PROVIDER = {
     'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,
     'CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL': 0.1,
 }
+
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken" 
 
 # Admin UI (with Jazzmin)
 JAZZMIN_SETTINGS = {
