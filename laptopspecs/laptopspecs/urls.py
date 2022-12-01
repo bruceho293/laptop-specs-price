@@ -30,7 +30,7 @@ router = routers.DefaultRouter()
 router.register(r'laptops', views.LaptopViewSet, basename='laptop')
 router.register(r'components', views.ComponentViewSet, basename='component')
 
-# Oauth 
+# Oauth  
 # OAuth2 provider endpoints
 oauth2_endpoint_views = [
     path('authorize/', oauth2_views.AuthorizationView.as_view(), name='authorize'),

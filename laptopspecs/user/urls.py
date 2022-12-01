@@ -8,7 +8,7 @@ urlpatterns = [
     path('detail/', views.UserDetail.as_view(), name='detail'),
     
     # User authorization through Oauth 2
-    path('authorize/', views.authorize, name='authorize'),
-    path('token/', views.get_token, name='token'),
-    path('revoke-token/', views.revoke_token, name='revoke-token'),
+    # path('authorize/', views.authorize, name='authorize'),
+    # path('token/', views.get_token, name='token'),
+    # path('revoke-token/', views.revoke_token, name='revoke-token'),
 ]

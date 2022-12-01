@@ -1,6 +1,9 @@
 from django.db import models
 
 from django.contrib.auth.models import User
+from oauth2_provider.models import Application
+from oauth2_provider.generators import generate_client_secret
+
 from laptop.models import Laptop
 from user.managers import UserProfileCustomManager
 
@@ -11,14 +14,15 @@ def user_directory_path(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE, primary_key=True)
-    avatar = models.ImageField(upload_to=user_directory_path)
+    avatar = models.ImageField(upload_to=user_directory_path, null=True, blank=True)
     imp_laptop = models.ManyToManyField(Laptop, related_name="laptop_impression", through="UserImpression", through_fields=('profile', 'laptop'))
+    oauth2_client_secret = models.CharField(max_length=255, blank=True, default=generate_client_secret)
 
     objects = models.Manager()
     custom_manager = UserProfileCustomManager()
 
     def __str__(self):
-        return self.user.username
+        return self.user.username + ' profile'
 
     def like_laptop(self, laptop_name):
         user_impression = UserImpression.objects.filter(profile=self, laptop__name=laptop_name)
