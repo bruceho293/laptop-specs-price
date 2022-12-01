@@ -207,8 +207,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 # Oauth2 Provider
 OAUTH_PROVIDER = {
     'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 86400,
-    'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 900,
     'CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL': 0.1,
 }
 
