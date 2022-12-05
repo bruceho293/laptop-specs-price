@@ -14,15 +14,17 @@ import os
 load_dotenv()
 
 from rest_framework import generics
+from rest_framework.views import APIView
 from rest_framework import status as rest_status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
-from oauth2_provider.views import TokenView
-from oauth2_provider.models import get_access_token_model
+from oauth2_provider.views import TokenView, RevokeTokenView
+from oauth2_provider.models import get_access_token_model, get_application_model
 from oauth2_provider.signals import app_authorized
 from oauth2_provider.decorators import protected_resource
+from oauth2_provider.views.mixins import OAuthLibMixin
 
 from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer
 from user.models import UserProfile
@@ -46,15 +48,14 @@ class UserRegister(generics.CreateAPIView):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class UserLogin(TokenView):
-    # permission_classes = [AllowAny]
+    """
+    Login request with username and password based on Oauth2 Resource Owner Password-based.
+    Implemented based on TokenView from Djano Oauth2 Toolkit.
+    With successful login, the client should have get a response with access token.
+    """
     
     @method_decorator(sensitive_post_parameters("password"))
     def post(self, request, *args, **kwargs):
-        """
-        Login request with username and password based on Oauth2 Resource Owner Password-based.
-        With successful login, the client should have get a response.
-        The response should have the access token and refresh token.
-        """
         
         # Get all necessary variables.
         data = request.POST
@@ -64,7 +65,7 @@ class UserLogin(TokenView):
 
         # Check if the username exists.
         if not UserProfile.objects.prefetch_related('user').filter(user__username=username).exists():
-            return Response(data="username \'{}\' does not exists.", status=status.HTTP_404_NOT_FOUND)
+            return HttpResponse(content=json.dumps({"error": "username \'{}\' does not exists.".format(username)}), status=rest_status.HTTP_404_NOT_FOUND)
 
         user = authenticate(request=request, username=username, password=password)
         
@@ -89,5 +90,25 @@ class UserLogin(TokenView):
                 response[k] = v
             return response
         else:
-            return Response(data={"error":"Invalid user credentials!"}, status=rest_status.HTTP_401_UNAUTHORIZED)
+            return HttpResponse(content=json.dumps({"error":"Invalid user credentials!"}), status=rest_status.HTTP_401_UNAUTHORIZED)
+
+class UserLogout(APIView):
+    """
+    Logout API endpoint that revoke both Oauth2 Access Token and Refresh Token.
+    """
+    permission_classes = [TokenHasReadWriteScope]
+    def post(self, request, *args, **kwargs):
+        # TODO: Looking into why the tokens don't get modified in `revoke-token` 
+        
+        # Custom alternative to revoke tokens
+        client_id = request.POST.get('client_id')
+        application = get_application_model().objects.get_object_or_404(client_id=client_id)
+        access_token = request.META['HTTP_AUTHORIZATION']
+
+        token = get_access_token_model().objects.get(token=access_token)
+        refresh_token = token.refresh_token
+        refresh_token.revoke()
+
+        return Response(data="Token revocation completes", status=rest_status.HTTP_200_OK)
+        
 
