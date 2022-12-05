@@ -148,7 +148,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'EST'
+TIME_ZONE = 'America/Toronto'
 
 USE_I18N = True
 
@@ -205,9 +205,10 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 # Oauth2 Provider
-OAUTH_PROVIDER = {
+OAUTH2_PROVIDER = {
     'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 900,
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 172800, # 2 days
     'CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL': 0.1,
 }
 
