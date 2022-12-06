@@ -1,7 +1,5 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from django.http import HttpResponse
-from django.urls import reverse
-from django.utils.http import urlencode
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
@@ -14,17 +12,15 @@ import os
 load_dotenv()
 
 from rest_framework import generics
-from rest_framework.views import APIView
 from rest_framework import status as rest_status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from oauth2_provider.views import TokenView, RevokeTokenView
-from oauth2_provider.models import get_access_token_model, get_application_model
+from oauth2_provider.models import get_access_token_model, get_refresh_token_model
 from oauth2_provider.signals import app_authorized
 from oauth2_provider.decorators import protected_resource
-from oauth2_provider.views.mixins import OAuthLibMixin
 
 from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer
 from user.models import UserProfile
@@ -83,7 +79,6 @@ class UserLogin(TokenView):
                 if access_token is not None:
                     token = get_access_token_model().objects.get(token=access_token)
                     app_authorized.send(sender=self, request=request, token=token)
-                body = json.dumps({'access_token': access_token})
             response = HttpResponse(content=body, status=status)
     
             for k, v in headers.items():
@@ -92,23 +87,30 @@ class UserLogin(TokenView):
         else:
             return HttpResponse(content=json.dumps({"error":"Invalid user credentials!"}), status=rest_status.HTTP_401_UNAUTHORIZED)
 
-class UserLogout(APIView):
+@method_decorator(csrf_exempt, name="dispatch")
+class UserLogout(RevokeTokenView):
     """
     Logout API endpoint that revoke both Oauth2 Access Token and Refresh Token.
     """
-    permission_classes = [TokenHasReadWriteScope]
+
     def post(self, request, *args, **kwargs):
-        # TODO: Looking into why the tokens don't get modified in `revoke-token` 
+        # TODO: Looking into why the tokens don't get modified in `revoke-token` (FIXED) 
         
-        # Custom alternative to revoke tokens
+        # Custom setup for authorization
         client_id = request.POST.get('client_id')
-        application = get_application_model().objects.get_object_or_404(client_id=client_id)
-        access_token = request.META['HTTP_AUTHORIZATION']
+        client_secret = os.environ.get('OAUTH2_CLIENT_SECRET')
+        client = base64.b64encode('{}:{}'.format(client_id, client_secret).encode()).decode()    
+        request.META['HTTP_AUTHORIZATION'] = 'Basic {}'.format(client)
 
-        token = get_access_token_model().objects.get(token=access_token)
-        refresh_token = token.refresh_token
-        refresh_token.revoke()
+        # Check if the token is refresh token.
+        token = request.POST.get('token')
+        if not get_refresh_token_model().objects.filter(token=token).exists():
+            return HttpResponse(content="Invalid token", status=rest_status.HTTP_404_NOT_FOUND)       
 
-        return Response(data="Token revocation completes", status=rest_status.HTTP_200_OK)
-        
+        url, headers, body, status = self.create_revocation_response(request)
+        response = HttpResponse(content=body or "", status=status)
+
+        for k, v in headers.items():
+            response[k] = v
+        return response
 
