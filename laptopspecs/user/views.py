@@ -5,9 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
 
 from dotenv import load_dotenv
-import base64
 import json
-import os
 
 load_dotenv()
 
@@ -24,6 +22,7 @@ from oauth2_provider.decorators import protected_resource
 
 from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer
 from user.models import UserProfile
+from user.decorators import get_client_credentials
 
 @api_view(['GET'])
 @permission_classes([TokenHasReadWriteScope])
@@ -43,65 +42,61 @@ class UserRegister(generics.CreateAPIView):
     serializer_class = UserProfileRegisterSerializer
 
 @method_decorator(csrf_exempt, name="dispatch")
-class UserLogin(TokenView):
+class UserToken(TokenView):
     """
-    Login request with username and password based on Oauth2 Resource Owner Password-based.
+    User token request with username and password based on Oauth2 Resource Owner Password-based.
     Implemented based on TokenView from Djano Oauth2 Toolkit.
     With successful login, the client should have get a response with access token.
     """
     
     @method_decorator(sensitive_post_parameters("password"))
+    @method_decorator(get_client_credentials)
     def post(self, request, *args, **kwargs):
         
-        # Get all necessary variables.
+        # Get all necessary variables.       
         data = request.POST
         username = data.get('username')
         password = data.get('password')
-        client_id = data.get('client_id')
+        grant_type = data.get('grant_type')
 
         # Check if the username exists.
-        if not UserProfile.objects.prefetch_related('user').filter(user__username=username).exists():
-            return HttpResponse(content=json.dumps({"error": "username \'{}\' does not exists.".format(username)}), status=rest_status.HTTP_404_NOT_FOUND)
+        if grant_type != "refresh_token":
+          if not UserProfile.objects.prefetch_related('user').filter(user__username=username).exists():
+              return HttpResponse(content=json.dumps({"error": "username \'{}\' does not exists.".format(username)}), status=rest_status.HTTP_404_NOT_FOUND)
 
-        user = authenticate(request=request, username=username, password=password)
+          user = authenticate(request=request, username=username, password=password)
         
-        if user is not None:
-            # Successful Authentication.
-            client_secret = os.environ.get('OAUTH2_CLIENT_SECRET')
-            client = base64.b64encode('{}:{}'.format(client_id, client_secret).encode()).decode()
-            
-            request.META['HTTP_AUTHORIZATION'] = 'Basic {}'.format(client)
-
-            # Oauth2 Token view
-            url, headers, body, status = self.create_token_response(request)
-            if status == 200:
-                access_token = json.loads(body).get("access_token")
-                if access_token is not None:
-                    token = get_access_token_model().objects.get(token=access_token)
-                    app_authorized.send(sender=self, request=request, token=token)
-            response = HttpResponse(content=body, status=status)
-    
-            for k, v in headers.items():
-                response[k] = v
-            return response
-        else:
+          if user is None:
             return HttpResponse(content=json.dumps({"error":"Invalid user credentials!"}), status=rest_status.HTTP_401_UNAUTHORIZED)
 
+        # Either the user is authenticated or the grant_type is "refresh_token"  
+        url, headers, body, status = self.create_token_response(request)
+        if status == 200:
+            access_token = json.loads(body).get("access_token")
+            if access_token is not None:
+                token = get_access_token_model().objects.get(token=access_token)
+                app_authorized.send(sender=self, request=request, token=token)
+            # Remove some extra information about OAuth2 Tokens
+            body = json.loads(body)
+            body.pop("expires_in", None)
+            body = json.dumps(body)
+        
+        response = HttpResponse(content=body, status=status)
+
+        for k, v in headers.items():
+            response[k] = v
+        return response
+
 @method_decorator(csrf_exempt, name="dispatch")
-class UserLogout(RevokeTokenView):
+class UserRevokeToken(RevokeTokenView):
     """
     Logout API endpoint that revoke both Oauth2 Access Token and Refresh Token.
     """
 
+    @method_decorator(get_client_credentials)
     def post(self, request, *args, **kwargs):
         # TODO: Looking into why the tokens don't get modified in `revoke-token` (FIXED) 
         
-        # Custom setup for authorization
-        client_id = request.POST.get('client_id')
-        client_secret = os.environ.get('OAUTH2_CLIENT_SECRET')
-        client = base64.b64encode('{}:{}'.format(client_id, client_secret).encode()).decode()    
-        request.META['HTTP_AUTHORIZATION'] = 'Basic {}'.format(client)
-
         # Check if the token is refresh token.
         token = request.POST.get('token')
         if not get_refresh_token_model().objects.filter(token=token).exists():

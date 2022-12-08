@@ -10,7 +10,6 @@ class UserImpressionSerializer(serializers.ModelSerializer):
         model = UserImpression
         fields = ['laptop_id', 'liked']
 
-
 class UserProfileDetailSerializer(serializers.ModelSerializer):
     impression = serializers.SerializerMethodField()
     username = serializers.CharField(source="user.username", read_only=True)
