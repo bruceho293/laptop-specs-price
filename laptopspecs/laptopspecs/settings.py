@@ -200,10 +200,6 @@ CORS_ORIGIN_WHITELIST = [
     'https://localhost:3000',
 ]
 
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    "x-user",
-]
-
 # Oauth2 Provider
 OAUTH2_PROVIDER = {
     'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},

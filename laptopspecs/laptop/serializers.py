@@ -1,6 +1,20 @@
 from rest_framework import serializers
 
 from laptop.models import Laptop, Memo, Component
+from user.models import UserImpression
+
+class BaseUserImpressionSerializer(serializers.Serializer):
+    like_count = serializers.SerializerMethodField()
+    dislike_count = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ['like_count', 'dislike_count']
+        
+    def get_like_count(self, obj):
+        return UserImpression.objects.filter(laptop=obj, liked=True).count()
+    
+    def get_dislike_count(self, obj):
+        return UserImpression.objects.filter(laptop=obj, liked=False).count()
 
 class ComponentSerializer(serializers.ModelSerializer):
     brand_name = serializers.ReadOnlyField(source='brand.name')
@@ -22,16 +36,16 @@ class MemoSerializer(serializers.ModelSerializer):
         model = Memo
         fields = ['name', 'category']
 
-class LaptopListSerializer(serializers.ModelSerializer):
-    brand_name = serializers.ReadOnlyField(source='brand.name')
-    specs_count = serializers.ReadOnlyField(source='specs.count')
+class LaptopListSerializer(BaseUserImpressionSerializer, serializers.ModelSerializer):
     class Meta:
         model = Laptop
-        fields = ['name', 'slug', 'brand_name', 'price', 'specs_count']
+        fields = ['name', 'slug', 'price', 'updated'] + \
+            BaseUserImpressionSerializer.Meta.fields
 
-class LaptopDetailSerializer(serializers.ModelSerializer):
+class LaptopDetailSerializer(BaseUserImpressionSerializer, serializers.ModelSerializer):
     brand_name = serializers.ReadOnlyField(source='brand.name')
     specs = MemoSerializer(many=True, read_only=True)
     class Meta:
         model = Laptop
-        fields = ['name', 'slug', 'brand_name', 'price', 'link', 'updated', 'specs']
+        fields = ['name', 'slug', 'brand_name', 'price', 'link', 'updated', 'specs'] + \
+            BaseUserImpressionSerializer.Meta.fields
