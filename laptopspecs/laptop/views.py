@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.list import ListView
 from django.views.generic import DetailView
-from django.db.models import F
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
@@ -9,9 +8,9 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from laptop.models import Laptop, Component, Brand, Memo
-from laptop.managers import ComponentType
+from laptop.models import Laptop, Component, Brand
 from laptop.serializers import LaptopListSerializer, LaptopDetailSerializer, ComponentSerializer, ComponentListSerializer
+from laptop.utils import get_memo_with_component_qnty, get_closest_components, get_closest_components_price
 
 # Create your views here.
 
@@ -58,11 +57,8 @@ class LaptopInfo(DetailView):
 
         # Get the laptop and its memos
         laptop = self.get_object()
-        memos = Memo.objects.filter(note_detail__laptop=laptop).annotate(qnty=F('note_detail__qnty')).order_by('name')
-        cpu = memos.filter(category=ComponentType.CPU)  
-        ram = memos.filter(category=ComponentType.RAM)
-        gpu = memos.filter(category=ComponentType.GPU)
-        disk = memos.filter(category=ComponentType.DISK)
+        qnty_memos = get_memo_with_component_qnty(laptop=laptop)
+        cpu, ram, gpu, disk = qnty_memos
 
         memos = {
             'cpu': cpu,
@@ -71,32 +67,17 @@ class LaptopInfo(DetailView):
             'disk': disk
         }
 
-        # Get the matching components.
-        # Calculate the total price of the components.
-        closest_component = {
-            'processor': Component.category_manager.get_closest_processor(cpu),
-            'memory': Component.category_manager.get_closest_memory_chip(ram),
-            'graphics_card': Component.category_manager.get_closest_graphics_card(gpu),
-            'storage': Component.category_manager.get_closest_storage(disk) 
-        }
+        closest_components = get_closest_components(qnty_memo=qnty_memos)
 
-        total_comps_price = 0
-        for category_comp in closest_component.keys():
-            components = closest_component[category_comp]
-            if components.exists():
-                for component in components:
-                    count = component.comp_count
-                    price = component.get_price
-                    total_comps_price += float(price) * count
-                
-
+        total_comps_price = get_closest_components_price(closest_components=closest_components)
+              
         price_difference = total_comps_price - float(laptop.get_price)
 
         no_match_notif = "No Matching Component"
 
         context['laptop'] = laptop
         context['memos'] = memos
-        context['closest_comp'] = closest_component
+        context['closest_comp'] = closest_components
         context['no_match_notif'] = no_match_notif
         context['total_comps_price'] = total_comps_price
         context['price_difference'] = price_difference
@@ -124,11 +105,7 @@ class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     def get_matching_components(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
         
-        memos = Memo.objects.filter(note_detail__laptop=laptop).annotate(qnty=F('note_detail__qnty')).order_by('name')
-        cpu = memos.filter(category=ComponentType.CPU)  
-        ram = memos.filter(category=ComponentType.RAM)
-        gpu = memos.filter(category=ComponentType.GPU)
-        disk = memos.filter(category=ComponentType.DISK)
+        cpu, ram, gpu, disk = get_memo_with_component_qnty(laptop=laptop)
 
         values = ('name', 'category', 'brand__name', 'link', 'updated', 'total_price', 'comp_count')
 

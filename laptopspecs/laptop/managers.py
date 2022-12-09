@@ -5,8 +5,8 @@ from django.db.models import F, Value, Case, When, ExpressionWrapper
 from django.db.models.functions import Cast, Round
 from django.utils.translation import gettext_lazy as _
 
-from common.util.regex_matching import text_to_seq_pattern
-from common.util.unit import unit_conversion
+from common.utils.regex_matching import text_to_seq_pattern
+from common.utils.unit import unit_conversion
 
 from laptop.functions import SubStrRegex
 
