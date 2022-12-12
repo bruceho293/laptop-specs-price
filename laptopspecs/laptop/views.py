@@ -72,6 +72,11 @@ class LaptopInfo(DetailView):
         total_comps_price = get_closest_components_price(closest_components=closest_components)
               
         price_difference = total_comps_price - float(laptop.get_price)
+ 
+        # Update the price difference if it is not equal to the saved price difference.
+        if price_difference != laptop.specs_price_difference:
+            laptop.specs_price_difference = price_difference
+            laptop.save()
 
         no_match_notif = "No Matching Component"
 

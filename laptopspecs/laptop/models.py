@@ -93,6 +93,8 @@ class Laptop(models.Model):
     updated = models.DateTimeField(auto_now=True)
     specs = models.ManyToManyField(Memo, related_name="specs", through='LaptopNote', through_fields=('laptop', 'memo'))
 
+    specs_price_difference = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True, default=0)
+    
     objects = models.Manager()
 
     def __str__(self):

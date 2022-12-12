@@ -19,21 +19,21 @@ class BaseUserImpressionSerializer(serializers.Serializer):
         return UserImpression.objects.filter(laptop=obj, liked=False).count()
 
 class BaseLaptopMethodFieldSerializer(serializers.Serializer):
-    price_compare = serializers.SerializerMethodField()
+    price_difference = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ['price_compare']
+        fields = ['price_difference']
 
-    def get_price_compare(self, obj):
+    def get_price_difference(self, obj):
         # `obj`is a Laptop obj.
         # TODO: Find a way to get the price comparision. CURRENT: Too heavy on the database query.
-        
-        # laptop_price = float(obj.price)
-        # closest_components_total_price = get_closest_components_price(laptop=obj)
-        # return math.ceil(closest_components_total_price*100 / 100) - laptop_price
+        #
+        # CURRENT ALTERNATIVE: 
+        # Save the computed price difference in the database and retrieve that price.
+        # Update the price difference if it's changed in Laptop Detail page.
         
         # Return the laptop price for now.
-        return obj.price
+        return obj.specs_price_difference
 
 class ComponentSerializer(serializers.ModelSerializer):
     brand_name = serializers.ReadOnlyField(source='brand.name')
