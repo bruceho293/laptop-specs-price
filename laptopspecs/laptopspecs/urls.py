@@ -25,6 +25,7 @@ from rest_framework import routers
 from oauth2_provider import views as oauth2_views
 
 from laptop import views
+from . import views as proj_views
 
 router = routers.DefaultRouter()
 router.register(r'laptops', views.LaptopViewSet, basename='laptop')
@@ -69,4 +70,4 @@ urlpatterns = [
 
 urlpatterns += static(prefix=settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-handler404 = views.error_404_not_found
+handler404 = proj_views.error_404_not_found
