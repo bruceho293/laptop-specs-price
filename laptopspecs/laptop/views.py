@@ -24,10 +24,6 @@ def homepage(request):
         'brand_qnty': brand_qnty,
     })
 
-def error_404_not_found(request, exception):
-    error_msg = 'Oops! Cannot find the page you are looking for!'
-    return render(request, '404.html', {'error_msg': error_msg})
-
 class LaptopSearchList(ListView):
     model = Laptop
     template = 'laptop/laptop_list.html'

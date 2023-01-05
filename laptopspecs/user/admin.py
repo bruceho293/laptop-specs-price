@@ -7,7 +7,6 @@ class ImpressionInline(admin.TabularInline):
     model = UserImpression
     verbose_name = "Laptop Likes-Dislikes"
     fields = ('profile', 'laptop', 'liked')
-    readonly_fields = ('laptop',)
     extra = 0
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

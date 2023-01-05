@@ -1,8 +1,6 @@
 from django.db import models
 
 from django.contrib.auth.models import User
-from oauth2_provider.models import Application
-from oauth2_provider.generators import generate_client_secret
 
 from laptop.models import Laptop
 from user.managers import UserProfileCustomManager
@@ -16,7 +14,6 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE, primary_key=True)
     avatar = models.ImageField(upload_to=user_directory_path, null=True, blank=True)
     imp_laptop = models.ManyToManyField(Laptop, related_name="laptop_impression", through="UserImpression", through_fields=('profile', 'laptop'))
-    oauth2_client_secret = models.CharField(max_length=255, blank=True, default=generate_client_secret)
 
     objects = models.Manager()
     custom_manager = UserProfileCustomManager()
