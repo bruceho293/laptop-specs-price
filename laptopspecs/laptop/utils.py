@@ -72,3 +72,27 @@ def get_closest_components_price(laptop:Laptop = None, closest_components: dict 
                 price = component.get_price
                 total_comps_price += float(price) * count
     return total_comps_price
+
+def update_price_difference(laptop: Laptop, total_comps_price: int = 0, closest_components: dict = None):
+    """
+    Update the price difference field that store the price difference
+    between the total price of matching components and the laptop price
+    in the laptop_laptop database.
+    
+    :param laptop: `Laptop` object.
+    :param total_comps_price: total price of the maching components. 
+    :param closest_component: a dict with component type Key and `Component` object Value. 
+    :return: the price difference from total price of matching components and laptop price.
+    """
+    if total_comps_price == 0:
+      if closest_components == None: 
+        closest_components = get_closest_components(laptop)
+      total_comps_price = get_closest_components_price(closest_components=closest_components)
+    
+    # Update the price difference if it is not equal to the saved price difference.
+    price_difference = total_comps_price - float(laptop.get_price)
+    if price_difference != laptop.specs_price_difference:
+        laptop.specs_price_difference = price_difference
+        laptop.save()
+    
+    return price_difference

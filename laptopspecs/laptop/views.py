@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 
 from laptop.models import Laptop, Component, Brand
 from laptop.serializers import LaptopListSerializer, LaptopDetailSerializer, ComponentSerializer, ComponentListSerializer
-from laptop.utils import get_memo_with_component_qnty, get_closest_components, get_closest_components_price
+from laptop.utils import get_memo_with_component_qnty, get_closest_components, get_closest_components_price, update_price_difference
 
 # Create your views here.
 
@@ -67,12 +67,7 @@ class LaptopInfo(DetailView):
 
         total_comps_price = get_closest_components_price(closest_components=closest_components)
               
-        price_difference = total_comps_price - float(laptop.get_price)
- 
-        # Update the price difference if it is not equal to the saved price difference.
-        if price_difference != laptop.specs_price_difference:
-            laptop.specs_price_difference = price_difference
-            laptop.save()
+        price_difference = update_price_difference(laptop=laptop, total_comps_price=total_comps_price)
 
         no_match_notif = "No Matching Component"
 
@@ -85,6 +80,7 @@ class LaptopInfo(DetailView):
 
         return context
 
+# REST API 
 class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Laptop.objects.all().order_by('name')
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -98,6 +94,7 @@ class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     @method_decorator(cache_page(60*60*2))
     def retrieve(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
+        update_price_difference(laptop=laptop)
         serializer = LaptopDetailSerializer(laptop)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
