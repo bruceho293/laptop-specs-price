@@ -86,19 +86,19 @@ class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
 
-    @method_decorator(cache_page(60*60*2))
+    @method_decorator(cache_page(60*30))
     def list(self, request):
         serializer = LaptopListSerializer(self.queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @method_decorator(cache_page(60*60*2))
+    @method_decorator(cache_page(60*30))
     def retrieve(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
         update_price_difference(laptop=laptop)
         serializer = LaptopDetailSerializer(laptop)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @method_decorator(cache_page(60*60*2))
+    @method_decorator(cache_page(60*30))
     @action(detail=True, url_path='get-matching-components')
     def get_matching_components(self, request, slug=None):
         laptop = get_object_or_404(self.queryset, slug=slug)
