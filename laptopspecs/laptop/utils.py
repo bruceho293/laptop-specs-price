@@ -1,4 +1,5 @@
 from django.db.models import F
+import math
 
 from laptop.models import Laptop, Component, Memo
 from laptop.managers import ComponentType
@@ -91,6 +92,9 @@ def update_price_difference(laptop: Laptop, total_comps_price: int = 0, closest_
     
     # Update the price difference if it is not equal to the saved price difference.
     price_difference = total_comps_price - float(laptop.get_price)
+
+    # Round the price difference to 2 decimal places
+    price_difference = math.ceil(price_difference * 100) / 100
     if price_difference != laptop.specs_price_difference:
         laptop.specs_price_difference = price_difference
         laptop.save()
