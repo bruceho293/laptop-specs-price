@@ -124,6 +124,17 @@ if platform.system() == "Linux" and not platform.release() == os.getenv("HOST_VE
 # db_from_env = dj_database_url.config(default=os.getenv("DATABASE_URL"), conn_max_age=600, ssl_require=True)
 # DATABASES['default'].update(db_from_env)
 
+# Caching mechanism
+CACHES = {
+  'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': [
+          '127.0.0.1:11211',
+          '18.217.135.159:11211',
+        ]
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -189,6 +200,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    # 'DATETIME_FORMAT': '%Y:%m:%dT%H:%M:%S',
 }
 
 # CORS Headers
