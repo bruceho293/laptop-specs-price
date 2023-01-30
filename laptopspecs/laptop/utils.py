@@ -97,6 +97,6 @@ def update_price_difference(laptop: Laptop, total_comps_price: int = 0, closest_
     price_difference = math.ceil(price_difference * 100) / 100
     if price_difference != laptop.specs_price_difference:
         laptop.specs_price_difference = price_difference
-        laptop.save()
+        laptop.save(update_fields=['specs_price_difference'])
     
     return price_difference
