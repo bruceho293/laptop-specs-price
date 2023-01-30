@@ -127,11 +127,12 @@ if platform.system() == "Linux" and not platform.release() == os.getenv("HOST_VE
 # Caching mechanism
 CACHES = {
   'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': [
-          '127.0.0.1:11211',
-          '18.217.135.159:11211',
-        ]
+      # 'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+      # 'LOCATION': [
+      #   '127.0.0.1:11211',
+      # ]
+      'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+      'LOCATION': 'LTXP_cache_table'
     }
 }
 
