@@ -1,5 +1,6 @@
 # laptop-specs-price
 Given the information of a laptop, find the information specs that has the closest match with the given information. 
+You can visit the site through [LTXP Link Here](http://18.217.135.159/)
 
 The specs that I want to cover (already covered) for the laptop would be:
 - [x] CPU
