@@ -59,6 +59,7 @@ if settings.DEBUG:
 # Final URLs 
 urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    path('__debug__/', include('debug_toolbar.urls')),
     path('accounts/', admin.site.urls, name="admin"),
     path('o/', include((oauth2_endpoint_views, 'oauth2_provider'), namespace='oath2_provider')),
     path('user/', include('user.urls'), name="user"),

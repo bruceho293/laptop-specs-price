@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '18.217.135.159']
+ALLOWED_HOSTS = ['localhost', '18.217.135.159', '127.0.0.1']
 
 
 # Application definition
@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'rest_framework',
     'corsheaders',
+    'debug_toolbar',
+
     'laptop.apps.LaptopConfig',
     'user.apps.UserConfig',
 ]
@@ -66,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'laptopspecs.urls'
@@ -93,6 +96,7 @@ WSGI_APPLICATION = 'laptopspecs.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 # Database Connection with psycopg2
+
 DATABASES = {
     # 'default': {
     #   'ENGINE': 'django.db.backends.sqlite3',
@@ -125,6 +129,7 @@ if platform.system() == "Linux" and not platform.release() == os.getenv("HOST_VE
 # DATABASES['default'].update(db_from_env)
 
 # Caching mechanism
+
 CACHES = {
   'default': {
       # 'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
@@ -188,6 +193,7 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # REST API
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
@@ -205,6 +211,7 @@ REST_FRAMEWORK = {
 }
 
 # CORS Headers
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000' ,# For React Front end during development
 ]
@@ -214,6 +221,7 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 # Oauth2 Provider
+
 OAUTH2_PROVIDER = {
     'SCOPES': {'read': 'Read Scopre', 'write': 'Write Scope'},
     'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
@@ -226,7 +234,15 @@ OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
 OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken" 
 
+# Django Debug Toolbar
+
+INTERNAL_IPS = [
+  'localhost',
+  '127.0.0.1',
+]
+
 # Admin UI (with Jazzmin)
+
 JAZZMIN_SETTINGS = {
     "site_title": "LTXP Database Administrative",
     "site_header": "LTXP DB Admin",
