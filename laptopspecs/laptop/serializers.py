@@ -55,12 +55,13 @@ class MemoSerializer(serializers.ModelSerializer):
         model = Memo
         fields = ['name', 'category']
 
-class LaptopListSerializer(BaseLaptopMethodFieldSerializer, BaseUserImpressionSerializer, serializers.ModelSerializer):
+class LaptopListSerializer(BaseLaptopMethodFieldSerializer, BaseUserImpressionSerializer, serializers.ModelSerializer):  
     class Meta:
         model = Laptop
         fields = ['name', 'slug', 'price', 'updated'] + \
             BaseLaptopMethodFieldSerializer.Meta.fields + \
-            BaseUserImpressionSerializer.Meta.fields
+            BaseUserImpressionSerializer.Meta.fields 
+        extra_kwargs = {'price': {'coerce_to_string': False}}
 
 class LaptopDetailSerializer(BaseLaptopMethodFieldSerializer, BaseUserImpressionSerializer, serializers.ModelSerializer):
     brand_name = serializers.ReadOnlyField(source='brand.name')
@@ -70,3 +71,4 @@ class LaptopDetailSerializer(BaseLaptopMethodFieldSerializer, BaseUserImpression
         fields = ['name', 'slug', 'brand_name', 'price', 'link', 'updated', 'specs'] + \
             BaseLaptopMethodFieldSerializer.Meta.fields + \
             BaseUserImpressionSerializer.Meta.fields
+        extra_kwargs = {'price': {'coerce_to_string': False}}
