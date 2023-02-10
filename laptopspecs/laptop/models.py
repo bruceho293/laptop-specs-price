@@ -4,9 +4,19 @@ from django.urls import reverse
 from laptop.managers import CategoryManager, ComponentType
 
 #  Create your models here.
+def custom_directory_path(instance, filename, dirname):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return 'ltxp_{2}/{0}/{1}'.format(instance.id, filename, dirname)
+
+def laptop_directory_path(instance, filename):
+    return custom_directory_path(instance, filename, 'laptop')
+def brand_directory_path(instance, filename):
+    return custom_directory_path(instance, filename, 'brand')
+
 class Brand(models.Model):
     name = models.CharField(verbose_name="brand_name", max_length=255, blank=False, null=False)
     link = models.URLField(verbose_name="website", max_length=255, blank=True, null=True)
+    logo = models.ImageField(upload_to=brand_directory_path, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -91,6 +101,7 @@ class Laptop(models.Model):
     price = models.DecimalField(max_digits=7, decimal_places=2, blank=False, null=False)
     link = models.URLField(verbose_name='source', max_length=255, blank=False, null=False)
     updated = models.DateTimeField(auto_now=True)
+    image_display = models.ImageField(upload_to=laptop_directory_path, null=True, blank=True)
     specs = models.ManyToManyField(Memo, related_name="specs", through='LaptopNote', through_fields=('laptop', 'memo'))
 
     specs_price_difference = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True, default=0)
