@@ -92,7 +92,6 @@ class Component(models.Model):
             return " ".join(words[2:]) # Ignore the first 2 words describing capacity
         return self.name
 
-
 # Laptop
 class Laptop(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False, unique=True)
@@ -122,7 +121,6 @@ class Laptop(models.Model):
     @property
     def get_source_url(self):
         return self.link
-
 
 class LaptopNote(models.Model):
     laptop = models.ForeignKey(Laptop, on_delete=models.CASCADE)
