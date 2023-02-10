@@ -1,7 +1,7 @@
 import math
 from rest_framework import serializers
 
-from laptop.models import Laptop, Memo, Component
+from laptop.models import Laptop, Memo, Component, Brand
 from laptop.utils import get_closest_components_price
 from user.models import UserImpression
 
@@ -34,6 +34,11 @@ class BaseLaptopMethodFieldSerializer(serializers.Serializer):
         
         # Return the laptop price for now.
         return obj.specs_price_difference
+
+class BrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ['name', 'logo']
 
 class ComponentSerializer(serializers.ModelSerializer):
     brand_name = serializers.ReadOnlyField(source='brand.name')

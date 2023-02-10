@@ -4,12 +4,12 @@ from django.views.generic import DetailView
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from laptop.models import Laptop, Component, Brand
-from laptop.serializers import LaptopListSerializer, LaptopDetailSerializer, ComponentSerializer, ComponentListSerializer
+from laptop.serializers import LaptopListSerializer, LaptopDetailSerializer, ComponentSerializer, ComponentListSerializer, BrandSerializer
 from laptop.utils import get_memo_with_component_qnty, get_closest_components, get_closest_components_price, update_price_difference
 
 # Create your views here.
@@ -81,6 +81,11 @@ class LaptopInfo(DetailView):
         return context
 
 # REST API 
+class BrandLogoList(generics.ListAPIView):
+    queryset = Brand.objects.all().order_by('name')
+    serializer_class = BrandSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Laptop.objects.all().order_by('name')
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]

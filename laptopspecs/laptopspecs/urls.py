@@ -66,6 +66,7 @@ urlpatterns = [
     path('laptop/', include('laptop.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls), name='api'),
+    path('api/brands/', views.BrandLogoList.as_view(), name='api-brand'),
     path('', views.homepage, name="homepage"),
 ]
 
