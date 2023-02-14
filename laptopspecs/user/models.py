@@ -31,3 +31,8 @@ class UserImpression(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     laptop = models.ForeignKey(Laptop, on_delete=models.CASCADE)
     liked = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+          models.UniqueConstraint(fields=['profile', 'laptop'], name='unique_profile_laptop_impression'),
+        ]

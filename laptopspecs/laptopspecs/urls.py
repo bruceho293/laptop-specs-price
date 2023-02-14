@@ -62,11 +62,11 @@ urlpatterns = [
     path('__debug__/', include('debug_toolbar.urls')),
     path('accounts/', admin.site.urls, name="admin"),
     path('o/', include((oauth2_endpoint_views, 'oauth2_provider'), namespace='oath2_provider')),
-    path('user/', include('user.urls'), name="user"),
     path('laptop/', include('laptop.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls), name='api'),
     path('api/brands/', views.BrandLogoList.as_view(), name='api-brand'),
+    path('api/user/', include('user.urls'), name="user"),
     path('', views.homepage, name="homepage"),
 ]
 

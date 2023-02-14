@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from laptop.models import Laptop, Component, Brand
-from laptop.serializers import LaptopListSerializer, LaptopDetailSerializer, ComponentSerializer, ComponentListSerializer, BrandSerializer
+from laptop.serializers import LaptopSerializer, LaptopDetailSerializer, ComponentSerializer, ComponentListSerializer, BrandSerializer
 from laptop.utils import get_memo_with_component_qnty, get_closest_components, get_closest_components_price, update_price_difference
 
 # Create your views here.
@@ -93,7 +93,7 @@ class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
 
     @method_decorator(cache_page(60*30))
     def list(self, request):
-        serializer = LaptopListSerializer(self.queryset, many=True)
+        serializer = LaptopSerializer(self.queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @method_decorator(cache_page(60*30))

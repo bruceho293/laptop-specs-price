@@ -20,8 +20,8 @@ from oauth2_provider.models import get_access_token_model, get_refresh_token_mod
 from oauth2_provider.signals import app_authorized
 from oauth2_provider.decorators import protected_resource
 
-from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer
-from user.models import UserProfile
+from user.serializers import UserProfileDetailSerializer, UserProfileRegisterSerializer, UserImpressionSerializer
+from user.models import UserProfile, UserImpression
 from user.decorators import get_client_credentials
 
 @api_view(['GET'])
@@ -36,6 +36,11 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserProfileDetailSerializer
     lookup_field = 'user__username'
     lookup_url_kwarg = 'username'
+
+class UserLikeDislike(generics.UpdateAPIView, generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
+    queryset = UserImpression.objects.all()
+    serializer_class = UserImpressionSerializer
 
 class UserRegister(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -59,7 +64,7 @@ class UserToken(TokenView):
         password = data.get('password')
         grant_type = data.get('grant_type')
 
-        # Check if the username exists.
+        # Check if the username exists when user logins.
         if grant_type != "refresh_token":
           if not UserProfile.objects.prefetch_related('user').filter(user__username=username).exists():
               return HttpResponse(content=json.dumps({"error": "username \'{}\' does not exists.".format(username)}), status=rest_status.HTTP_404_NOT_FOUND)

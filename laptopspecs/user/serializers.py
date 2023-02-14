@@ -4,11 +4,12 @@ from django.contrib.auth.models import User
 from user.models import UserImpression, UserProfile
 
 class UserImpressionSerializer(serializers.ModelSerializer):
-    laptop_id = serializers.IntegerField(source="laptop.id", read_only=True)
+    laptop_slug = serializers.SlugField(source="laptop.slug")
+    profile_name = serializers.CharField(source="profile.user.username")
     
     class Meta:
         model = UserImpression
-        fields = ['laptop_id', 'liked']
+        fields = ['profile_name', 'laptop_slug', 'liked']
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):
     impression = serializers.SerializerMethodField()
@@ -21,7 +22,10 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
 
     def get_impression(self, obj):
         qs = UserImpression.objects.filter(profile=obj)
-        return [UserImpressionSerializer(imp).data for imp in qs]
+        def remove_profile_name(impression):
+            del impression['profile_name']
+            return impression
+        return [remove_profile_name(UserImpressionSerializer(imp).data) for imp in qs]
 
 class UserProfileRegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", required=True)
