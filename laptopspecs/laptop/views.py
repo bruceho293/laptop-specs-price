@@ -85,6 +85,7 @@ class BrandLogoList(generics.ListAPIView):
     queryset = Brand.objects.all().order_by('name')
     serializer_class = BrandSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    paginator = None
 
 class LaptopViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Laptop.objects.all().order_by('name')
