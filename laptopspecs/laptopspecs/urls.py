@@ -71,5 +71,6 @@ urlpatterns = [
 ]
 
 urlpatterns += static(prefix=settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(prefix=settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = proj_views.error_404_not_found
