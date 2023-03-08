@@ -6,7 +6,9 @@ from laptop.managers import CategoryManager, ComponentType
 #  Create your models here.
 def custom_directory_path(instance, filename, dirname):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return 'ltxp_{2}/{0}/{1}'.format(instance.id, filename, dirname)
+    if isinstance(instance, Laptop):  
+      return 'ltxp_{2}/{0}/{1}'.format(instance.slug, filename, dirname)
+    return 'ltxp_{2}/{0}/{1}'.format(instance.name, filename, dirname)
 
 def laptop_directory_path(instance, filename):
     return custom_directory_path(instance, filename, 'laptop')
