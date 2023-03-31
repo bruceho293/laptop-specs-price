@@ -37,7 +37,7 @@ class UserDetail(generics.RetrieveAPIView):
     lookup_field = 'user__username'
     lookup_url_kwarg = 'username'
 
-class UserLikeDislike(generics.UpdateAPIView, generics.DestroyAPIView):
+class UserLikeDislike(generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, TokenHasReadWriteScope]
     queryset = UserImpression.objects.all()
     serializer_class = UserImpressionSerializer
@@ -67,7 +67,7 @@ class UserToken(TokenView):
         # Check if the username exists when user logins.
         if grant_type != "refresh_token":
           if not UserProfile.objects.prefetch_related('user').filter(user__username=username).exists():
-              return HttpResponse(content=json.dumps({"error": "username \'{}\' does not exists.".format(username)}), status=rest_status.HTTP_404_NOT_FOUND)
+              return HttpResponse(content=json.dumps({"error": "Profile with username \'{}\' does not exists.".format(username)}), status=rest_status.HTTP_404_NOT_FOUND)
 
           user = authenticate(request=request, username=username, password=password)
         

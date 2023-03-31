@@ -1,15 +1,44 @@
+from wsgiref.validate import validator
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from django.contrib.auth.models import User
 from user.models import UserImpression, UserProfile
+from laptop.models import Laptop
+
+class CustomUserSlugRelatedField(serializers.SlugRelatedField):
+  def to_representation(self, obj):
+      return obj.user.username
 
 class UserImpressionSerializer(serializers.ModelSerializer):
-    laptop_slug = serializers.SlugField(source="laptop.slug")
-    profile_name = serializers.CharField(source="profile.user.username")
+    profile = CustomUserSlugRelatedField(queryset=UserProfile.objects.all(), slug_field="user__username")
+    laptop = serializers.SlugRelatedField(queryset=Laptop.objects.all(), slug_field="slug")
     
     class Meta:
         model = UserImpression
-        fields = ['profile_name', 'laptop_slug', 'liked']
+        fields = ['profile', 'laptop', 'liked']
+        validators = [
+          UniqueTogetherValidator(
+            queryset=UserImpression.objects.all(),
+            fields=['profile', 'laptop']
+          )
+        ]
+
+    def create(self, validated_data):
+          
+      profile = validated_data.get("profile", None)
+      laptop = validated_data.get("laptop", None)
+
+      if profile is None:
+        raise serializers.ValidationError(
+          {"profile": "Cannot retrieve the profile instance with the username"}
+        )
+      if laptop is None:
+        raise serializers.ValidationError(
+          {"laptop": "Cannot retrieve the laptop instance with the laptop slug"}
+        )
+      liked = validated_data.get("liked", True)
+      return UserImpression.objects.create(profile=profile, laptop=laptop, liked=liked)
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):
     impression = serializers.SerializerMethodField()
@@ -23,7 +52,7 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
     def get_impression(self, obj):
         qs = UserImpression.objects.filter(profile=obj)
         def remove_profile_name(impression):
-            del impression['profile_name']
+            del impression['profile']
             return impression
         return [remove_profile_name(UserImpressionSerializer(imp).data) for imp in qs]
 
