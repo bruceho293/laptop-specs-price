@@ -6,14 +6,17 @@ from django.contrib.auth.models import User
 from user.models import UserImpression, UserProfile
 from laptop.models import Laptop
 
+class CustomUserSlugRelatedField(serializers.SlugRelatedField):
+  def to_representation(self, obj):
+      return obj.user.username
+
 class UserImpressionSerializer(serializers.ModelSerializer):
-    profile = serializers.SlugRelatedField(queryset=UserProfile.objects.select_related("user").all(), slug_field="user__username")
+    profile = CustomUserSlugRelatedField(queryset=UserProfile.objects.all(), slug_field="user__username")
     laptop = serializers.SlugRelatedField(queryset=Laptop.objects.all(), slug_field="slug")
     
     class Meta:
         model = UserImpression
         fields = ['profile', 'laptop', 'liked']
-        depth = 1
         validators = [
           UniqueTogetherValidator(
             queryset=UserImpression.objects.all(),
